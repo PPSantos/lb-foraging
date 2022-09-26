@@ -334,6 +334,9 @@ class ForagingEnv(Env):
             position[1] - center[1] + min(sight, center[1]),
         )
 
+    def _transform_to_neighborhood_absolute(self, center, sight, position):
+        return (position[0], position[1])
+
     def get_valid_actions(self) -> list:
         return list(product(*[self._valid_actions[player] for player in self.players]))
 
@@ -342,7 +345,7 @@ class ForagingEnv(Env):
             actions=self._valid_actions[player],
             players=[
                 self.PlayerObservation(
-                    position=self._transform_to_neighborhood(
+                    position=self._transform_to_neighborhood_absolute(
                         player.position, self.sight, a.position
                     ),
                     level=a.level,
