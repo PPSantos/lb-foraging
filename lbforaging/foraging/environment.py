@@ -134,7 +134,7 @@ class ForagingEnv(Env):
             max_food = self.max_food
             max_food_level = self.max_player_level * len(self.players)
 
-            min_obs = [-1, -1, -1] * max_food + [-1, -1, -1] * len(self.players)
+            min_obs = [0, 0, 0] * max_food + [0, 0, 0] * len(self.players)
             max_obs = [field_x-1, field_y-1, max_food_level] * max_food + [
                 field_x-1,
                 field_y-1,
@@ -403,24 +403,27 @@ class ForagingEnv(Env):
             max_food_level = self.max_player_level * len(self.players)
 
             for i in range(self.max_food):
-                obs[3 * i] = -1
-                obs[3 * i + 1] = -1
-                obs[3 * i + 2] = -1 # mask with -1.
+                obs[3 * i] = 0
+                obs[3 * i + 1] = 0
+                obs[3 * i + 2] = 0
 
-            for i, (y, x) in enumerate(zip(*np.nonzero(observation.field))): # TODO: make positions absolute?
+            for i, (y, x) in enumerate(zip(*np.nonzero(observation.field))):
                 obs[3 * i] = y
                 obs[3 * i + 1] = x
                 obs[3 * i + 2] = observation.field[y, x]
 
                 if self._normalize_observation:
-                    obs[3 * i] /= (obs_field_y - 1)
-                    obs[3 * i + 1] /= (obs_field_x - 1)
+                    obs[3 * i] += 1
+                    obs[3 * i] /= obs_field_y
+                    obs[3 * i + 1] += 1
+                    obs[3 * i + 1] /= obs_field_x
+                    obs[3 * i + 2] += 1
                     obs[3 * i + 2] /= max_food_level
 
             for i in range(len(self.players)):
-                obs[self.max_food * 3 + 3 * i] = -1
-                obs[self.max_food * 3 + 3 * i + 1] = -1
-                obs[self.max_food * 3 + 3 * i + 2] = -1 # mask with -1.
+                obs[self.max_food * 3 + 3 * i] = 0
+                obs[self.max_food * 3 + 3 * i + 1] = 0
+                obs[self.max_food * 3 + 3 * i + 2] = 0
 
             for i, p in enumerate(seen_players):
                 obs[self.max_food * 3 + 3 * i] = p.position[0]
@@ -428,8 +431,11 @@ class ForagingEnv(Env):
                 obs[self.max_food * 3 + 3 * i + 2] = p.level
 
                 if self._normalize_observation:
-                    obs[self.max_food * 3 + 3 * i] /= (field_y - 1)
-                    obs[self.max_food * 3 + 3 * i + 1] /= (field_x - 1)
+                    obs[self.max_food * 3 + 3 * i] += 1
+                    obs[self.max_food * 3 + 3 * i] /= field_y
+                    obs[self.max_food * 3 + 3 * i + 1] += 1
+                    obs[self.max_food * 3 + 3 * i + 1] /= field_x
+                    obs[self.max_food * 3 + 3 * i + 2] += 1
                     obs[self.max_food * 3 + 3 * i + 2] /= self.max_player_level
 
             return obs
